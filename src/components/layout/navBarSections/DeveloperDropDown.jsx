@@ -28,7 +28,7 @@ const DeveloperDropDown = () => {
     },
     {
       title: "Stablecoins",
-      subtitle: "Access USDC and Coinbase Custom Stablecoins",
+      subtitle: "Access USDC and custom stablecoins",
       icon: <CircleStackIcon className="w-5 h-5" />,
     },
   ];
@@ -48,19 +48,19 @@ const DeveloperDropDown = () => {
     },
     {
       title: "Startups",
-      subtitle: "Launch your business with the world's leader in crypto",
+      subtitle: "Launch your business with crypto tools",
       icon: <Square2StackIcon className="w-5 h-5" />,
     },
   ];
 
   return (
-    <div className="bg-white w-full max-w-6xl mx-auto px-4 sm:px-6 md:px-8 py-6 md:py-10 lg:py-12">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 lg:gap-12">
-        {/* Left: Coinbase Developer Platform */}
+    <div className="bg-white w-full px-4 sm:px-6 md:px-8 lg:px-12 py-6 md:py-10 lg:py-12">
+      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 lg:gap-12">
+        {/* Left: Developer Platform */}
         <div className="flex-1">
           <div className="flex items-center gap-1 mb-4 md:mb-6 cursor-pointer hover:bg-gray-100 rounded-xl px-3 py-2 w-fit">
             <span className="font-bold text-sm md:text-base">
-              Coinbase Developer Platform
+              CryptoApp Developer Platform
             </span>
             <ChevronRightIcon className="w-4 h-4" />
           </div>

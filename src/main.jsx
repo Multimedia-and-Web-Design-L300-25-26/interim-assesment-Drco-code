@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App";
 import { BrowserRouter } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
 
 /**
  * Mount the React app and add global error handlers / debug logging.
@@ -62,7 +63,10 @@ function mountApp() {
     root.render(
       <StrictMode>
         <BrowserRouter>
-          <App />
+          {/* AuthProvider makes login/logout state available to every component */}
+          <AuthProvider>
+            <App />
+          </AuthProvider>
         </BrowserRouter>
       </StrictMode>,
     );

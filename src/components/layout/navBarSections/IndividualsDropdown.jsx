@@ -34,12 +34,12 @@ const IndividualsDropdown = () => {
       icon: <ReceiptPercentIcon className="w-5 h-5" />,
     },
     {
-      title: "Coinbase One",
+      title: "Premium",
       subtitle: "Get zero trading fees and more",
       icon: <TagIcon className="w-5 h-5" />,
     },
     {
-      title: "Coinbase Wealth",
+      title: "Wealth Management",
       subtitle: "Institutional-grade services for UHNW",
       icon: <SparklesIcon className="w-5 h-5" />,
     },
@@ -71,7 +71,8 @@ const IndividualsDropdown = () => {
   ];
 
   return (
-    <div className="bg-white w-full max-w-6xl mx-auto px-4 sm:px-6 md:px-8 py-6 md:py-10 lg:py-12">
+    <div className="bg-white w-full px-4 sm:px-6 md:px-8 lg:px-12 py-6 md:py-10 lg:py-12">
+      <div className="max-w-6xl mx-auto">
       <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
         {individualItems.map((item) => (
           <li key={item.title}>
@@ -93,6 +94,7 @@ const IndividualsDropdown = () => {
           </li>
         ))}
       </ul>
+      </div>
     </div>
   );
 };

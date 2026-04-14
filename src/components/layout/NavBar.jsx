@@ -8,8 +8,8 @@ import {
 } from "@heroicons/react/24/solid";
 import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import coinbaseLogo from "../../assets/coinbaseLogoNavigation-4.svg";
 import BusinessDropDown from "./navBarSections/BusinessDropDown";
+import DisclaimerBanner from "../common/DisclaimerBanner";
 import CompanyDropdown from "./navBarSections/CompanyDropdown";
 import DeveloperDropDown from "./navBarSections/DeveloperDropDown";
 import IndividualsDropdown from "./navBarSections/IndividualsDropdown";
@@ -78,7 +78,7 @@ const NavBar = () => {
             %
           </div>
         );
-      case "Coinbase One":
+      case "Premium":
         return (
           <div className="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
             <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -98,7 +98,7 @@ const NavBar = () => {
             </svg>
           </div>
         );
-      case "Coinbase Wealth":
+      case "Wealth Management":
         return (
           <div className="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
             <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -175,15 +175,15 @@ const NavBar = () => {
         href: "/earn",
       },
       {
-        title: "Coinbase One",
+        title: "Premium",
         description: "Get zero trading fees and more",
-        icon: getIcon("Coinbase One"),
+        icon: getIcon("Premium"),
         href: "/coinbase-one",
       },
       {
-        title: "Coinbase Wealth",
+        title: "Wealth Management",
         description: "Institutional-grade services for UHNW",
-        icon: getIcon("Coinbase Wealth"),
+        icon: getIcon("Wealth Management"),
         href: "/wealth",
       },
       {
@@ -202,7 +202,7 @@ const NavBar = () => {
     Business: [
       {
         title: "Asset Listings",
-        description: "List your asset on Coinbase",
+        description: "List your asset on the platform",
         icon: (
           <div className="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
             <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -213,7 +213,7 @@ const NavBar = () => {
         href: "/asset-listings",
       },
       {
-        title: "Coinbase Business",
+        title: "CryptoApp Business",
         description: "Business solutions",
         icon: (
           <div className="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -302,7 +302,7 @@ const NavBar = () => {
     Developers: [
       {
         title: "Developer Platform",
-        description: "Build on Coinbase",
+        description: "Build on CryptoApp",
         icon: (
           <div className="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
             <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -314,7 +314,7 @@ const NavBar = () => {
       },
       {
         title: "Base",
-        description: "L2 blockchain by Coinbase",
+        description: "L2 blockchain for developers",
         icon: (
           <div className="w-10 h-10 bg-gray-900 rounded-lg flex items-center justify-center flex-shrink-0">
             <div className="w-4 h-4 bg-white rounded-sm"></div>
@@ -338,7 +338,7 @@ const NavBar = () => {
     Company: [
       {
         title: "About",
-        description: "Learn about Coinbase",
+        description: "Learn about CryptoApp",
         icon: (
           <div className="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0 text-lg font-bold">
             i
@@ -412,6 +412,9 @@ const NavBar = () => {
 
   return (
     <>
+      {/* Disclaimer banner — visible on all pages since NavBar is used everywhere */}
+      <DisclaimerBanner />
+
       {activeComponent && (
         <button
           type="button"
@@ -514,14 +517,9 @@ const NavBar = () => {
               <ArrowLeftIcon className="w-5 h-5" />
             </button>
           ) : (
-            <img
-              src={coinbaseLogo}
-              alt="Coinbase Logo"
-              title="Coinbase Logo"
-              width={40}
-              height={40}
-              className="w-8 h-8 md:w-11 md:h-11"
-            />
+            <span className="font-bold text-lg md:text-xl text-blue-600 tracking-tight">
+              CryptoApp
+            </span>
           )}
         </div>
 
