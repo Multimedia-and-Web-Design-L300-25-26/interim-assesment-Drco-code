@@ -26,3 +26,4 @@ dist-ssr
 # Backend — NEVER commit secrets or installed packages
 backend/.env
 backend/node_modules/
+backend/.env.example
