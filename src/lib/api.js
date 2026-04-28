@@ -7,20 +7,20 @@
 import axios from "axios";
 
 // Vite exposes env vars with the VITE_ prefix via import.meta.env
-// NEVER use process.env in Vite — it won't work at build time
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5001/api";
 
 export const api = axios.create({
   baseURL: BASE_URL,
   timeout: 15000, // 15 seconds — accounts for Render cold start on free tier
+  withCredentials: true, // Required: sends HTTP-only cookies cross-origin
   headers: {
     "Content-Type": "application/json",
   },
 });
 
 // --- Request interceptor ---
-// Runs before every request. Attaches the JWT token from localStorage
-// so protected routes (like /profile) receive the Authorization header automatically.
+// Attaches the JWT token from localStorage as a fallback Authorization header.
+// The HTTP-only cookie is sent automatically via withCredentials: true.
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
@@ -33,7 +33,6 @@ api.interceptors.request.use(
 );
 
 // --- Response interceptor ---
-// Runs after every response. Logs errors to the console for easier debugging.
 api.interceptors.response.use(
   (response) => response,
   (error) => {

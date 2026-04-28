@@ -12,6 +12,7 @@ const cryptoSchema = new mongoose.Schema(
     symbol: {
       type: String,
       required: [true, "Symbol is required (e.g. BTC, ETH)"],
+      unique: true, // prevents duplicate symbols (e.g. two BTC entries)
       uppercase: true, // always store symbols in uppercase
       trim: true,
     },

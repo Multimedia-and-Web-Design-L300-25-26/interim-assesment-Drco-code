@@ -43,7 +43,7 @@ const getNewCryptos = async (req, res) => {
 
 /**
  * addCrypto — POST /api/crypto
- * Adds a new cryptocurrency to the database.
+ * Adds a new cryptocurrency. Rejects duplicate symbols.
  *
  * Required body fields: name, symbol, price
  * Optional: image (URL string), change24h (number)
@@ -51,20 +51,26 @@ const getNewCryptos = async (req, res) => {
 const addCrypto = async (req, res) => {
   const { name, symbol, price, image, change24h } = req.body;
 
-  // Validate required fields
   if (!name || !symbol || price === undefined || price === null) {
     return res.status(400).json({ message: "name, symbol, and price are required" });
   }
 
-  // Validate price is a positive number
   if (isNaN(parseFloat(price)) || parseFloat(price) < 0) {
     return res.status(400).json({ message: "price must be a positive number" });
   }
 
   try {
+    // Explicit duplicate check before insert (cleaner error message than the Mongo 11000 code)
+    const existing = await Crypto.findOne({ symbol: symbol.toUpperCase() });
+    if (existing) {
+      return res.status(409).json({
+        message: `A cryptocurrency with symbol ${symbol.toUpperCase()} already exists`,
+      });
+    }
+
     const crypto = await Crypto.create({
       name,
-      symbol: symbol.toUpperCase(), // ensure symbol is uppercase (BTC not btc)
+      symbol: symbol.toUpperCase(),
       price: parseFloat(price),
       image: image || "",
       change24h: parseFloat(change24h) || 0,
@@ -72,6 +78,10 @@ const addCrypto = async (req, res) => {
 
     res.status(201).json(crypto);
   } catch (error) {
+    // Catch MongoDB duplicate key error as a safety net
+    if (error.code === 11000) {
+      return res.status(409).json({ message: "A cryptocurrency with this symbol already exists" });
+    }
     res.status(500).json({ message: "Failed to add cryptocurrency", error: error.message });
   }
 };

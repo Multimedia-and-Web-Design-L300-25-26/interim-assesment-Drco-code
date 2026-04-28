@@ -9,7 +9,6 @@ import {
 import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import BusinessDropDown from "./navBarSections/BusinessDropDown";
-import DisclaimerBanner from "../common/DisclaimerBanner";
 import CompanyDropdown from "./navBarSections/CompanyDropdown";
 import DeveloperDropDown from "./navBarSections/DeveloperDropDown";
 import IndividualsDropdown from "./navBarSections/IndividualsDropdown";
@@ -412,9 +411,6 @@ const NavBar = () => {
 
   return (
     <>
-      {/* Disclaimer banner — visible on all pages since NavBar is used everywhere */}
-      <DisclaimerBanner />
-
       {activeComponent && (
         <button
           type="button"

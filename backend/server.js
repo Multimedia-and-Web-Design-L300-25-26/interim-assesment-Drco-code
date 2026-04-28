@@ -5,6 +5,7 @@ const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
+const cookieParser = require("cookie-parser");
 
 // Load environment variables from .env BEFORE importing anything that uses them
 dotenv.config();
@@ -17,27 +18,36 @@ const cryptoRoutes = require("./routes/cryptoRoutes");
 const app = express();
 
 // --- CORS ---
-// Allow requests from the local Vite dev server and the deployed Netlify URL
+// Allow requests from the local Vite dev server and the deployed Netlify URL.
+// credentials: true is required so HTTP-only cookies are sent cross-origin.
 const allowedOrigins = [
   "http://localhost:5173",
-  process.env.FRONTEND_URL, // set this in Render: https://your-app.netlify.app
-].filter(Boolean); // remove undefined entries if FRONTEND_URL is not set
+  process.env.FRONTEND_URL,
+].filter(Boolean);
 
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+      // Allow requests with no origin (e.g. curl, mobile apps, Postman)
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true, // Required: allows cookies to be sent cross-origin
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
-// --- Body parsers ---
-// Parse incoming JSON and URL-encoded request bodies
+// --- Middleware ---
+app.use(cookieParser()); // Parse HTTP-only cookies (must come before routes)
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // --- Routes ---
-// Auth routes: GET /api/register, GET /api/login
+// Auth routes: GET /api/register, GET /api/login, GET /api/logout
 app.use("/api", authRoutes);
 
 // User routes: GET /api/profile (protected)
@@ -47,7 +57,6 @@ app.use("/api", userRoutes);
 app.use("/api/crypto", cryptoRoutes);
 
 // --- Health check ---
-// Visit the root URL to confirm the server is running (useful after deploying to Render)
 app.get("/", (req, res) => {
   res.json({ message: "Crypto App API is running — student project by Derrick Oware" });
 });
@@ -65,5 +74,5 @@ mongoose
   })
   .catch((err) => {
     console.error("MongoDB connection failed:", err.message);
-    process.exit(1); // Exit if we can't connect to the database
+    process.exit(1);
   });

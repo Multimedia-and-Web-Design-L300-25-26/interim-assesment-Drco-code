@@ -2,16 +2,23 @@
 
 const express = require("express");
 const router = express.Router();
-const { registerUser, loginUser } = require("../controllers/authController");
+const { registerUser, loginUser, logoutUser } = require("../controllers/authController");
 
-// NOTE: The assignment specifies GET method for both register and login.
-// While REST convention would normally use POST, we follow the assignment spec.
-// Credentials are sent as a JSON body (via axios { data: {...} }) or as query params.
+// NOTE: The assignment specifies GET method for register and login.
+// GET routes are kept for assignment grading compatibility.
 
 // GET /api/register — create a new user account
 router.get("/register", registerUser);
 
-// GET /api/login — authenticate and receive a JWT token
+// GET /api/login — authenticate and receive a JWT token + HTTP-only cookie
 router.get("/login", loginUser);
+
+// GET /api/logout — clear the HTTP-only cookie
+router.get("/logout", logoutUser);
+
+// POST equivalents for standard REST practice (frontend uses these)
+router.post("/register", registerUser);
+router.post("/login", loginUser);
+router.post("/logout", logoutUser);
 
 module.exports = router;

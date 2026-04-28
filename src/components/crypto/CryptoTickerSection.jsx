@@ -1,5 +1,9 @@
-import axios from "axios";
+// CryptoTickerSection.jsx — Homepage crypto card widget
+// Fetches from our backend (not CoinGecko).
+// Three tabs: Tradable (all), Top Gainers, New on Coinbase
+
 import { useEffect, useState } from "react";
+import { api } from "../../lib/api";
 
 const CryptoTickerSection = () => {
   const [activeTab, setActiveTab] = useState("tradable");
@@ -13,48 +17,12 @@ const CryptoTickerSection = () => {
         setLoading(true);
         setError(null);
 
-        let url =
-          "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&sparkline=false&per_page=6";
+        let endpoint = "/crypto";
+        if (activeTab === "gainers") endpoint = "/crypto/gainers";
+        else if (activeTab === "new") endpoint = "/crypto/new";
 
-        if (activeTab === "gainers") {
-          url =
-            "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&sparkline=false&per_page=250&order=market_cap_desc";
-        } else if (activeTab === "new") {
-          url = "https://api.coingecko.com/api/v3/search/trending";
-        } else {
-          url =
-            "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&sparkline=false&per_page=6";
-        }
-
-        const response = await axios.get(url);
-
-        if (activeTab === "gainers") {
-          const sorted = (response.data || [])
-            .filter((c) => c.price_change_percentage_24h != null)
-            .sort(
-              (a, b) =>
-                (b.price_change_percentage_24h || 0) -
-                (a.price_change_percentage_24h || 0),
-            )
-            .slice(0, 6);
-          setCryptos(sorted);
-        } else if (activeTab === "new") {
-          const transformed = (
-            response.data && response.data.coins ? response.data.coins : []
-          )
-            .slice(0, 6)
-            .map((item) => ({
-              id: item.item.id,
-              name: item.item.name,
-              symbol: item.item.symbol,
-              image: item.item.large,
-              current_price: item.item.price_btc,
-              price_change_percentage_24h: 0,
-            }));
-          setCryptos(transformed);
-        } else {
-          setCryptos(response.data || []);
-        }
+        const response = await api.get(endpoint);
+        setCryptos(response.data || []);
       } catch (err) {
         console.error("Error fetching cryptos:", err);
         setError("Failed to load crypto data");
@@ -127,31 +95,47 @@ const CryptoTickerSection = () => {
                 )}
                 {!loading && !error && cryptos.length === 0 && (
                   <p className="text-gray-400 text-sm md:text-base text-center py-4">
-                    No data available
+                    No data yet — run <code className="text-xs bg-gray-800 px-1 py-0.5 rounded">pnpm seed</code> in the backend folder.
                   </p>
                 )}
                 {!loading &&
                   !error &&
                   cryptos.map((crypto) => {
-                    const price = crypto.current_price || 0;
-                    const change = crypto.price_change_percentage_24h || 0;
+                    const price = crypto.price || 0;
+                    const change = crypto.change24h || 0;
                     return (
                       <div
-                        key={crypto.id}
+                        key={crypto._id}
                         className="flex items-center justify-between py-2 sm:py-3 md:py-4 px-2 sm:px-3 md:px-4 rounded-lg hover:bg-gray-900 transition-colors"
                       >
                         <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-                          <img
-                            src={crypto.image}
-                            alt={crypto.name}
-                            className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 shrink-0 rounded-full"
-                          />
+                          {/* Coin avatar: image if available, symbol initial as fallback */}
+                          <div className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 shrink-0 rounded-full bg-gray-700 flex items-center justify-center overflow-hidden">
+                            {crypto.image ? (
+                              <img
+                                src={crypto.image}
+                                alt={crypto.name}
+                                className="w-full h-full object-contain rounded-full"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = "none";
+                                  e.currentTarget.nextSibling.style.display = "flex";
+                                }}
+                              />
+                            ) : null}
+                            <span
+                              className="text-xs font-bold text-white items-center justify-center"
+                              style={{ display: crypto.image ? "none" : "flex" }}
+                            >
+                              {(crypto.symbol || "?")[0]}
+                            </span>
+                          </div>
+
                           <div className="min-w-0 flex-1">
                             <p className="text-white font-semibold text-sm sm:text-base truncate">
                               {crypto.name}
                             </p>
                             <p className="text-gray-400 text-xs hidden sm:block">
-                              {(crypto.symbol || "").toUpperCase()}
+                              {crypto.symbol}
                             </p>
                           </div>
                         </div>
@@ -159,7 +143,7 @@ const CryptoTickerSection = () => {
                         <div className="text-right shrink-0 ml-2">
                           <p className="text-white font-semibold text-sm sm:text-base">
                             $
-                            {price.toLocaleString(undefined, {
+                            {Number(price).toLocaleString(undefined, {
                               minimumFractionDigits: 0,
                               maximumFractionDigits: 2,
                             })}

@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
+import DemoNotice from "../components/DemoNotice";
 
 export default function SignUp() {
   const [name, setName] = useState("");
@@ -56,11 +57,6 @@ export default function SignUp() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      {/* Demo warning banner — assignment requirement */}
-      <div className="bg-yellow-50 border-b border-yellow-200 text-center py-2 px-4 text-sm text-yellow-800">
-        Demo app – do not use your real password. This is a student project by Derrick Oware.
-      </div>
-
       <div className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-md">
           {/* Logo and heading */}
@@ -82,6 +78,11 @@ export default function SignUp() {
             <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900">
               Create account
             </h1>
+          </div>
+
+          {/* Demo password warning — same reusable component as /signin */}
+          <div className="mb-6">
+            <DemoNotice />
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">

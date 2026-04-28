@@ -1,33 +1,32 @@
-// controllers/authController.js — Handles user registration and login
+// controllers/authController.js — Handles user registration, login, and logout
 
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 
-/**
- * generateToken — creates a signed JWT for a given user ID.
- * The token expires in 30 days and is signed with JWT_SECRET from .env.
- */
 const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "30d" });
+  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "7d" });
 };
+
+// Cookie options — secure + sameSite='none' required in production for cross-origin cookies
+const getCookieOptions = () => ({
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
+});
 
 /**
  * registerUser — GET /api/register
  *
- * Accepts: name, email, password
- * Reads from req.body first, falls back to req.query (supports both JSON body and query params)
- *
- * NOTE: The assignment specifies GET method for register. This is unusual (normally POST),
- * but we follow the spec. Credentials are sent as a JSON body via axios { data: {...} }
- * which works even on GET requests, or as query params ?name=...&email=...&password=...
+ * Reads from req.body first, falls back to req.query (supports JSON body and query params).
+ * NOTE: The assignment specifies GET method for register. Credentials are sent via axios
+ * as query params (?name=...&email=...&password=...) which Express reads from req.query.
  */
 const registerUser = async (req, res) => {
-  // Support body (preferred) and query params
   const name = req.body.name || req.query.name;
   const email = req.body.email || req.query.email;
   const password = req.body.password || req.query.password;
 
-  // Validate all required fields are present
   if (!name || !email || !password) {
     return res
       .status(400)
@@ -35,21 +34,22 @@ const registerUser = async (req, res) => {
   }
 
   try {
-    // Check if a user with this email already exists
     const userExists = await User.findOne({ email });
     if (userExists) {
-      return res.status(400).json({ message: "An account with this email already exists" });
+      return res.status(409).json({ message: "An account with this email already exists" });
     }
 
-    // Create the user — password is automatically hashed by the pre-save hook in User.js
     const user = await User.create({ name, email, password });
+    const token = generateToken(user._id);
 
-    // Return the new user's info along with a JWT token
+    // Set JWT as HTTP-only cookie so it's sent automatically on subsequent requests
+    res.cookie("token", token, getCookieOptions());
+
     return res.status(201).json({
       _id: user._id,
       name: user.name,
       email: user.email,
-      token: generateToken(user._id),
+      token, // also returned in body so frontend can store in localStorage as fallback
     });
   } catch (error) {
     return res
@@ -61,8 +61,8 @@ const registerUser = async (req, res) => {
 /**
  * loginUser — GET /api/login
  *
- * Accepts: email, password
- * Returns a JWT token if credentials are correct.
+ * Verifies credentials, signs a JWT, sets it as an HTTP-only cookie,
+ * and also returns it in the response body.
  */
 const loginUser = async (req, res) => {
   const email = req.body.email || req.query.email;
@@ -73,16 +73,18 @@ const loginUser = async (req, res) => {
   }
 
   try {
-    // Find the user by email
     const user = await User.findOne({ email });
 
-    // Check user exists AND password matches the stored hash
     if (user && (await user.matchPassword(password))) {
+      const token = generateToken(user._id);
+
+      res.cookie("token", token, getCookieOptions());
+
       return res.json({
         _id: user._id,
         name: user.name,
         email: user.email,
-        token: generateToken(user._id),
+        token,
       });
     } else {
       return res.status(401).json({ message: "Invalid email or password" });
@@ -94,4 +96,17 @@ const loginUser = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser };
+/**
+ * logoutUser — GET /api/logout
+ *
+ * Clears the HTTP-only cookie. The frontend should also clear localStorage.
+ */
+const logoutUser = (req, res) => {
+  res.cookie("token", "", {
+    httpOnly: true,
+    expires: new Date(0), // immediately expire the cookie
+  });
+  return res.json({ message: "Logged out successfully" });
+};
+
+module.exports = { registerUser, loginUser, logoutUser };
